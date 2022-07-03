@@ -18,11 +18,6 @@ type Lpvoid uintptr
 type Lpbyte uintptr
 type Process_Information_Class uintptr
 
-//type Lpdword uintptr
-//type Lpcstr uintptr
-//type Ulong uint32
-//type Ulong64 uint64
-
 type ProcessInformation struct {
 	ProcessHandle            Handle
 	ProcessInformationClass  Process_Information_Class
@@ -76,8 +71,6 @@ func main() {
 	lpStartupInfo := StartupInfo{}
 	lpProcessInformation := ProcessInformation{}
 
-	//sysCall()
-
 	res, _, err := syscall.Syscall12(
 		createProcess.Addr(),
 		uintptr(0),
@@ -99,19 +92,6 @@ func main() {
 		os.Exit(1)
 	}
 	fmt.Println(res)
-}
-
-func sysCall() {
-	// make the windowsapi call, i have no clue how to implement this correctly rn (without syscall)
-	// probably do some C shenanigans, shouldnt be to hard. maybe something along the lines of:
-
-	/*
-		//#include <windows.h>
-		import "C"
-		...
-		C.CreateProcess(
-			C.CString(...),
-	*/
 }
 
 func stringToUTF16Ptr(str string) uintptr {
