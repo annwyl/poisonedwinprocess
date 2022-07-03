@@ -59,9 +59,12 @@ type Flags struct {
 var (
 	kernel32      = syscall.NewLazyDLL("kernel32.dll")
 	createProcess = kernel32.NewProc("CreateProcessW")
+	allocConsole  = kernel32.NewProc("AllocConsole")
+	freeConsole   = kernel32.NewProc("FreeConsole")
 )
 
 func main() {
+	// variables should be able to be set by the user later on
 	globalFlags := Flags{}
 	getFlags(&globalFlags)
 	lpProcessAttributes := SecurityAttributes{}
@@ -71,9 +74,11 @@ func main() {
 	lpStartupInfo := StartupInfo{}
 	lpProcessInformation := ProcessInformation{}
 
-	res, _, err := syscall.Syscall12(
-		createProcess.Addr(),
-		uintptr(0),
+	freeConsole.Call()
+	allocConsole.Call()
+	fmt.Println("Console allocated")
+
+	res, _, _ := createProcess.Call(
 		uintptr(unsafe.Pointer(nil)),
 		stringToUTF16Ptr(globalFlags.Process),
 		uintptr(unsafe.Pointer(&lpProcessAttributes)),
@@ -84,13 +89,7 @@ func main() {
 		uintptr(unsafe.Pointer(nil)),
 		uintptr(unsafe.Pointer(&lpStartupInfo)),
 		uintptr(unsafe.Pointer(&lpProcessInformation)),
-		uintptr(0),
-		uintptr(0),
 	)
-	if err != 0 {
-		fmt.Println(err)
-		os.Exit(1)
-	}
 	fmt.Println(res)
 }
 
